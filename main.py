@@ -28,7 +28,7 @@ class AimAssistApp(QMainWindow):
         self.setGeometry(100, 100, 900, 700)
         
         # Default settings
-        self.target_color = np.array([201, 0, 141])
+        self.target_color = np.array([201, 0, 141])  # BGR: [141, 0, 201] -> RGB: (201,0,141) -> #C9008D
         self.threshold = 40
         self.sensitivity = 0.7
         self.active = False
@@ -36,10 +36,10 @@ class AimAssistApp(QMainWindow):
         
         self.setup_ui()
         
-        # Create timer for tracking
+        # Create tracker timer
         self.tracker_timer = QTimer(self)
         self.tracker_timer.timeout.connect(self.track_target)
-        self.tracker_timer.setInterval(10)  # 10ms
+        self.tracker_timer.setInterval(10)  # ~100 FPS
         
     def setup_ui(self):
         # Create main tabs
@@ -75,40 +75,353 @@ class AimAssistApp(QMainWindow):
         self.apply_styles()
         
     def create_multiplayer_tab(self):
-        # ... (نفس كود الواجهة السابق) ...
-        # أبقِ كود الواجهة كما هو تماماً
+        tab = QWidget()
+        layout = QVBoxLayout()
+        layout.setSpacing(20)
+        layout.setContentsMargins(20, 20, 20, 20)
         
+        # Title
+        title = QLabel("Aim Assist Multiplayer")
+        title.setFont(QFont("Arial", 18, QFont.Bold))
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("color: #FFA500; margin-bottom: 20px;")
+        layout.addWidget(title)
+        
+        # Aim assist buttons
+        aim_assist_group = self.create_aim_assist_group()
+        layout.addWidget(aim_assist_group)
+        
+        # Additional buttons
+        additional_buttons = self.create_additional_buttons()
+        layout.addWidget(additional_buttons)
+        
+        # Color preview
+        color_layout = QHBoxLayout()
+        color_layout.addWidget(QLabel("Target Color:"))
+        
+        self.color_preview = QLabel()
+        self.color_preview.setFixedSize(40, 40)
+        self.update_color_preview()
+        color_layout.addWidget(self.color_preview)
+        
+        color_btn = QPushButton("Change Color")
+        color_btn.clicked.connect(self.select_target_color)
+        color_layout.addWidget(color_btn)
+        
+        layout.addLayout(color_layout)
+        
+        # Version info
+        version = QLabel("Version 1.5 | Updated: 2023-11-15")
+        version.setFont(QFont("Arial", 9))
+        version.setAlignment(Qt.AlignCenter)
+        version.setStyleSheet("color: #666666; margin-top: 20px;")
+        layout.addWidget(version)
+        
+        tab.setLayout(layout)
+        return tab
+    
     def create_settings_tab(self):
-        # ... (نفس كود الواجهة السابق) ...
-        # أبقِ كود الواجهة كما هو تماماً
+        tab = QWidget()
+        layout = QVBoxLayout()
+        layout.setSpacing(20)
+        layout.setContentsMargins(20, 20, 20, 20)
         
+        title = QLabel("Settings & Configuration")
+        title.setFont(QFont("Arial", 18, QFont.Bold))
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("color: #1E90FF; margin-bottom: 20px;")
+        layout.addWidget(title)
+        
+        # Color Threshold
+        threshold_layout = QHBoxLayout()
+        threshold_layout.addWidget(QLabel("Color Threshold:"))
+        
+        self.threshold_slider = QSlider(Qt.Horizontal)
+        self.threshold_slider.setMinimum(10)
+        self.threshold_s极客
+        self.threshold_slider.setMaximum(100)
+        self.threshold_slider.setValue(self.threshold)
+        self.threshold_slider.valueChanged.connect(self.update_threshold)
+        threshold_layout.addWidget(self.threshold_slider)
+        
+        self.threshold_label = QLabel(str(self.threshold))
+        threshold_layout.addWidget(self.threshold_label)
+        
+        layout.addLayout(threshold_layout)
+        
+        # Sensitivity
+        sensitivity_layout = QHBoxLayout()
+        sensitivity_layout.addWidget(QLabel("Sensitivity:"))
+        
+        self.sensitivity_slider = QSlider(Qt.Horizontal)
+        self.sensitivity_slider.setMinimum(10)
+        self.sensitivity_slider.setMaximum(100)
+        self.sensitivity_slider.setValue(int(self.sensitivity * 100))
+        self.sensitivity_slider.valueChanged.connect(self.update_sensitivity)
+        sensitivity_layout.addWidget(self.sensitivity_slider)
+        
+        self.sensitivity_label = QLabel(f"{self.sensitivity:.2f}")
+        sensitivity_layout.addWidget(self.sensitivity_label)
+        
+        layout.addLayout(sensitivity_layout)
+        
+        # Control buttons
+        btn_save = self.create_button("Save Settings", "#4CAF50")
+        btn_save.setFixedHeight(50)
+        btn_save.clicked.connect(self.save_settings)
+        
+        btn_res极客
+        btn_reset = self.create_button("Reset to Default", "#F44336")
+        btn_reset.setFixedHeight(50)
+        btn_reset.clicked.connect(self.reset_settings)
+        
+        btn_layout = QHBoxLayout()
+        btn_layout.addWidget(btn_save)
+        btn_layout.addWidget(btn_reset)
+        layout.addLayout(btn_layout)
+        
+        # Spacer
+        layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        
+        tab.setLayout(layout)
+        return tab
+    
     def create_contact_tab(self):
-        # ... (نفس كود الواجهة السابق) ...
-        # أبقِ كود الواجهة كما هو تماماً
+        tab = QWidget()
+        layout = QVBoxLayout()
+        layout.setSpacing(30)
+        layout.setContentsMargins(30, 30, 30, 30)
         
+        title = QLabel("Contact & Support")
+        title.setFont(QFont("Arial", 22, QFont.Bold))
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("color: #1E90FF; margin-bottom: 20px;")
+        layout.addWidget(title)
+        
+        # Contact cards
+        contact_frame = QFrame()
+        contact_frame.setStyleSheet("background-color: #252525; border-radius: 10px; padding: 20px;")
+        contact_layout = QVBoxLayout()
+        
+        # Email support
+        email_card = self.create_contact_card(
+            "Email Support", 
+            "support@codassist.com", 
+            "Send us an email for any issues or questions", 
+            "#FF5722"
+        )
+        email_card.clicked.connect(lambda: self.open_email("support@codassist.com"))
+        contact_layout.addWidget(email_card)
+        
+        # Discord community
+        discord_card = self.create_contact_card(
+            "Discord Community", 
+            "discord.gg/codassist", 
+            "Join our Discord server for real-time support", 
+            "#7289DA"
+        )
+        discord_card.clicked.connect(lambda: webbrowser.open("https://discord.gg/codassist"))
+        contact_layout.addWidget(discord_card)
+        
+        # Website
+        website_card = self.create_contact_card(
+            "Official Website", 
+            "www.codassist.com", 
+            "Visit our website for updates and documentation", 
+            "#4CAF50"
+        )
+        website_card.clicked.connect(lambda: webbrowser.open("https://www.codassist.com"))
+        contact_layout.addWidget(website_card)
+        
+        # Updates
+        updates_card = self.create_contact_card(
+            "Check for Updates", 
+            "Version 1.5 (Latest)", 
+            "Click to check for software updates", 
+            "#2196F3"
+        )
+        updates_card.clicked.connect(self.check_for_updates)
+        contact_layout.addWidget(updates_card)
+        
+        contact_frame.setLayout(contact_layout)
+        layout.addWidget(contact_frame)
+        
+        # Copyright
+        copyright = QLabel("© 2023 COD AimAssist. All rights reserved.")
+        copyright.setFont(QFont("Arial", 9))
+        copyright.setAlignment(Qt.AlignCenter)
+        copyright.setStyleSheet("color: #666666; margin-top: 30px;")
+        layout.addWidget(copyright)
+        
+        tab.setLayout(layout)
+        return tab
+    
+    def create_contact_card(self, title, subtitle, description, color):
+        card = QPushButton()
+        card.setCursor(Qt.PointingHandCursor)
+        card.setStyleSheet(
+            f"QPushButton {{ text-align: left; padding: 15px; border-radius: 8px; background-color: {color}; }}"
+            f"QPushButton:hover {{ background-color: {self.lighten_color(color)}; }}"
+        )
+        
+        card_layout = QVBoxLayout()
+        
+        title_label = QLabel(title)
+        title_label.setFont(QFont("Arial", 14, QFont.Bold))
+        title_label.setStyleSheet("color: white;")
+        card_layout.addWidget(title_label)
+        
+        subtitle_label = QLabel(subtitle)
+        subtitle_label.setFont(QFont("Arial", 12))
+        subtitle_label.setStyleSheet("color: white; margin-top: 5px;")
+        card_layout.addWidget(subtitle_label)
+        
+        desc_label = QLabel(description)
+        desc_label.setFont(QFont("Arial", 10))
+        desc_label.setStyleSheet("color: rgba(255,255,255,0.8); margin-top: 10px;")
+        card_layout.addWidget(desc_label)
+        
+        card.setLayout(card_layout)
+        return card
+    
     def create_aim_assist_group(self):
-        # ... (نفس كود الواجهة السابق) ...
-        # أبقِ كود الواجهة كما هو تماماً
+        group = QGroupBox()
+        group.setStyleSheet("QGroupBox { border: 2px solid #444444; border-radius: 10px; }")
+        layout = QGridLayout()
+        layout.setHorizontalSpacing(20)
+        layout.setVerticalSpacing(15)
         
+        # Aim assist types
+        assist_types = [
+            ("Lite AimAssist", "#4CAF50", "Low intensity assist for subtle aiming help"),
+            ("Normal AimAssist", "#2196F3", "Standard assist for balanced gameplay"),
+            ("Middle AimAssist", "#FF9800", "Enhanced assist for more aggressive play"),
+            ("Super AimAssist", "#F44336", "Maximum assist for competitive advantage")
+        ]
+        
+        # Create buttons for each type
+        for i, (name, color, tip) in enumerate(assist_types):
+            # Start button
+            btn = self.create_button(name, color, tip)
+            btn.setFixedHeight(60)
+            layout.addWidget(btn, i, 0)
+            
+            # Stop button
+            stop_btn = self.create_button(f"Stop {name}", "#555555", "Deactivate this aim assist level")
+            stop_btn.setFixedHeight(60)
+            layout.addWidget(stop_btn, i, 1)
+            
+            # Connect events
+            btn.clicked.connect(lambda checked, n=name: self.activate_aim_assist(n))
+            stop_btn.clicked.connect(lambda checked, n=name: self.deactivate_aim_assist(n))
+        
+        group.setLayout(layout)
+        return group
+    
     def create_additional_buttons(self):
-        # ... (نفس كود الواجهة السابق) ...
-        # أبقِ كود الواجهة كما هو تماماً
+        widget = QWidget()
+        layout = QHBoxLayout()
+        layout.setSpacing(15)
         
+        # Additional buttons
+        buttons = [
+            ("Head", "#9C27B0", "Focus aim on head shots"),
+            ("Random", "#00BCD4", "Randomize aim pattern for unpredictability"),
+            ("Chests", "#795548", "Prioritize chest shots for consistent damage")
+        ]
+        
+        for name, color, tip in buttons:
+            btn = self.create_button(name, color, tip)
+            btn.setFixedHeight(50)
+            layout.addWidget(btn)
+            btn.clicked.connect(lambda checked, n=name: self.handle_additional_button(n))
+        
+        widget.setLayout(layout)
+        return widget
+    
     def create_button(self, text, color, tooltip=""):
-        # ... (نفس كود الواجهة السابق) ...
-        # أبقِ كود الواجهة كما هو تماماً
-        
+        btn = QPushButton(text)
+        btn.setFont(QFont("Arial", 12, QFont.Bold))
+        btn.setCursor(Qt.PointingHandCursor)
+        if tooltip:
+            btn.setToolTip(tooltip)
+        btn.setStyleSheet(
+            f"QPushButton {{ background-color: {color}; color: white; border-radius: 8px; padding: 10px; }}"
+            f"QPushButton:hover {{ background-color: {self.lighten_color(color)}; }}"
+            f"QPushButton:pressed {{ background-color: {self.darken_color(color)}; }}"
+            f"QToolTip {{ background-color: #333333; color: #FFFFFF; border: 1px solid #555555; }}"
+        )
+        return btn
+    
     def lighten_color(self, hex_color, factor=0.3):
-        # ... (نفس كود الواجهة السابق) ...
-        # أبقِ كود الواجهة كما هو تماماً
-        
+        color = QColor(hex_color)
+        return color.lighter(int(100 + factor * 100)).name()
+    
     def darken_color(self, hex_color, factor=0.3):
-        # ... (نفس كود الواجهة السابق) ...
-        # أبقِ كود الواجهة كما هو تماماً
-        
+        color = QColor(hex_color)
+        return color.darker(int(100 + factor * 100)).name()
+    
     def apply_styles(self):
-        # ... (نفس كود الواجهة السابق) ...
-        # أبقِ كود الواجهة كما هو تماماً
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #121212;
+            }
+            QTabWidget::pane {
+                border: 1px solid #333333;
+                border-radius: 4px;
+                background: #1E1E1E;
+                margin-top: 5px;
+            }
+            QTabBar::tab {
+                background: #252525;
+                color: #CCCCCC;
+                padding: 12px 25px;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                border: 1px solid #333333;
+                margin-right: 2px;
+                font-weight: bold;
+            }
+            QTabBar::tab:selected {
+                background: #2D2D2D;
+                color: #FFFFFF;
+                border-bottom: 3px solid #FFA500;
+            }
+            QTabBar::tab:hover {
+                background: #3A3A3A;
+            }
+            QGroupBox {
+                color: #CCCCCC;
+                font-size: 14px;
+                margin-top: 20px;
+                font-weight: bold;
+            }
+            QLabel {
+                color: #CCCCCC;
+            }
+            QSlider::groove:horizontal {
+                border: 1px solid #444;
+                height: 8px;
+                background: #333;
+                margin: 2px 0;
+                border-radius: 4px;
+            }
+            QSlider::handle:horizontal {
+                background: #1E90FF;
+                border: 1px solid #555;
+                width: 18px;
+                margin: -4px 0;
+                border-radius: 9px;
+            }
+            QSlider::add-page:horizontal {
+                background: #555;
+                border-radius: 4极客
+            }
+            QSlider::sub-page:horizontal {
+                background: #1E90FF;
+                border-radius: 4px;
+            }
+        """)
     
     def activate_aim_assist(self, name):
         self.active = True
@@ -122,6 +435,7 @@ class AimAssistApp(QMainWindow):
         self.status_label.setText("Aim assist deactivated")
         
     def handle_additional_button(self, name):
+        self.mode = name
         self.status_label.setText(f"Mode set to: {name}")
         
     def open_email(self, email):
