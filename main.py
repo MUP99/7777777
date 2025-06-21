@@ -23,8 +23,8 @@ def resource_path(relative_path):
 class TrackerThread(QThread):
     update_status = pyqtSignal(str)
     
-    def __init__(self, target_color, threshold, sensitivity, parent=None):
-        super().__init__(parent)
+    def __init__(self, target_color, threshold, sensitivity):
+        super().__init__()
         self.target_color = target_color
         self.threshold = threshold
         self.sensitivity = sensitivity
@@ -102,27 +102,58 @@ class AimAssistApp(QMainWindow):
         self.threshold = 40
         self.sensitivity = 0.7
         
-        # تأجيل إنشاء الخيط إلى بعد تهيئة الواجهة
+        # لن ننشئ الخيط هنا
+        self.tracker = None
+        
         self.setup_ui()
         
-        # إنشاء الخيط بعد تهيئة الواجهة
+    def setup_ui(self):
+        # ... (نفس كود الواجهة) ...
+        # أبقِ كود الواجهة كما هو
+
+    # ... (بقية الدوال) ...
+    
+    def start_tracker(self):
+        """إنشاء وتشغيل الخيط بعد إنشاء الواجهة"""
+        if self.tracker and self.tracker.isRunning():
+            self.tracker.stop()
+        
         self.tracker = TrackerThread(
             self.target_color, 
             self.threshold, 
-            self.sensitivity,
-            parent=self
+            self.sensitivity
         )
         self.tracker.update_status.connect(self.update_status)
         self.tracker.start()
         
-    def setup_ui(self):
-        # ... (بقية الكود كما هو بدون تغيير) ...
-        # نفس كود الواجهة السابق بدون تعديل
-
-    # ... (بقية الدوال كما هي) ...
+    def activate_aim_assist(self, name):
+        if not self.tracker or not self.tracker.isRunning():
+            self.start_tracker()
+        self.tracker.activate(name)
+        self.status_label.setText(f"Active: {name} | Press F8 to stop")
+        
+    def deactivate_aim_assist(self, name):
+        if self.tracker and self.tracker.isRunning():
+            self.tracker.deactivate()
+        self.status_label.setText("Aim assist deactivated")
+        
+    def set_color(self, color):
+        self.target_color = color
+        if self.tracker:
+            self.tracker.set_color(color)
+        
+    def set_threshold(self, threshold):
+        self.threshold = threshold
+        if self.tracker:
+            self.tracker.set_threshold(threshold)
+    
+    def set_sensitivity(self, sensitivity):
+        self.sensitivity = sensitivity
+        if self.tracker:
+            self.tracker.set_sensitivity(sensitivity)
 
     def closeEvent(self, event):
-        if hasattr(self, 'tracker') and self.tracker.isRunning():
+        if self.tracker and self.tracker.isRunning():
             self.tracker.stop()
         event.accept()
 
@@ -150,4 +181,8 @@ if __name__ == "__main__":
     
     window = AimAssistApp()
     window.show()
+    
+    # بدء الخيط بعد عرض النافذة
+    QTimer.singleShot(500, window.start_tracker)
+    
     sys.exit(app.exec_())
