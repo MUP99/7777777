@@ -28,7 +28,7 @@ class AimAssistApp(QMainWindow):
         self.setGeometry(100, 100, 900, 700)
         
         # Default settings
-        self.target_color = np.array([201, 0, 141])  # BGR: [141, 0, 201] -> RGB: (201,0,141) -> #C9008D
+        self.target_color = np.array([201, 0, 141])  # اللون الافتراضي (BGR)
         self.threshold = 40
         self.sensitivity = 0.7
         self.active = False
@@ -36,33 +36,33 @@ class AimAssistApp(QMainWindow):
         
         self.setup_ui()
         
-        # Create tracker timer
+        # إنشاء مؤقت للتتبع
         self.tracker_timer = QTimer(self)
         self.tracker_timer.timeout.connect(self.track_target)
-        self.tracker_timer.setInterval(10)  # ~100 FPS
+        self.tracker_timer.setInterval(10)  # 10ms (100 FPS)
         
     def setup_ui(self):
-        # Create main tabs
+        # إنشاء التبويبات الرئيسية
         self.tabs = QTabWidget()
         self.tabs.setTabPosition(QTabWidget.North)
         self.tabs.setMovable(False)
         
-        # Create content tabs
+        # إنشاء محتوى التبويبات
         self.multiplayer_tab = self.create_multiplayer_tab()
         self.settings_tab = self.create_settings_tab()
         self.contact_tab = self.create_contact_tab()
         
-        # Add tabs
+        # إضافة التبويبات
         self.tabs.addTab(self.multiplayer_tab, "Multiplayer")
         self.tabs.addTab(self.settings_tab, "Settings")
         self.tabs.addTab(self.contact_tab, "Contact")
         
-        # Status bar
+        # شريط الحالة
         self.status_label = QLabel("Ready")
         self.status_label.setFont(QFont("Arial", 10))
         self.status_label.setStyleSheet("color: #AAAAAA; padding: 5px;")
         
-        # Main layout
+        # التخطيط الرئيسي
         main_widget = QWidget()
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.tabs)
@@ -71,7 +71,7 @@ class AimAssistApp(QMainWindow):
         
         self.setCentralWidget(main_widget)
         
-        # Apply styles
+        # تطبيق التصميم
         self.apply_styles()
         
     def create_multiplayer_tab(self):
@@ -80,22 +80,22 @@ class AimAssistApp(QMainWindow):
         layout.setSpacing(20)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        # Title
+        # العنوان
         title = QLabel("Aim Assist Multiplayer")
         title.setFont(QFont("Arial", 18, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
         title.setStyleSheet("color: #FFA500; margin-bottom: 20px;")
         layout.addWidget(title)
         
-        # Aim assist buttons
+        # أزرار المساعدة على التصويب
         aim_assist_group = self.create_aim_assist_group()
         layout.addWidget(aim_assist_group)
         
-        # Additional buttons
+        # أزرار إضافية
         additional_buttons = self.create_additional_buttons()
         layout.addWidget(additional_buttons)
         
-        # Color preview
+        # معاينة اللون
         color_layout = QHBoxLayout()
         color_layout.addWidget(QLabel("Target Color:"))
         
@@ -110,7 +110,7 @@ class AimAssistApp(QMainWindow):
         
         layout.addLayout(color_layout)
         
-        # Version info
+        # معلومات الإصدار
         version = QLabel("Version 1.5 | Updated: 2023-11-15")
         version.setFont(QFont("Arial", 9))
         version.setAlignment(Qt.AlignCenter)
@@ -132,13 +132,12 @@ class AimAssistApp(QMainWindow):
         title.setStyleSheet("color: #1E90FF; margin-bottom: 20px;")
         layout.addWidget(title)
         
-        # Color Threshold
+        # عتبة اللون
         threshold_layout = QHBoxLayout()
         threshold_layout.addWidget(QLabel("Color Threshold:"))
         
         self.threshold_slider = QSlider(Qt.Horizontal)
         self.threshold_slider.setMinimum(10)
-        self.threshold_s极客
         self.threshold_slider.setMaximum(100)
         self.threshold_slider.setValue(self.threshold)
         self.threshold_slider.valueChanged.connect(self.update_threshold)
@@ -149,7 +148,7 @@ class AimAssistApp(QMainWindow):
         
         layout.addLayout(threshold_layout)
         
-        # Sensitivity
+        # الحساسية
         sensitivity_layout = QHBoxLayout()
         sensitivity_layout.addWidget(QLabel("Sensitivity:"))
         
@@ -165,12 +164,11 @@ class AimAssistApp(QMainWindow):
         
         layout.addLayout(sensitivity_layout)
         
-        # Control buttons
+        # أزرار التحكم
         btn_save = self.create_button("Save Settings", "#4CAF50")
         btn_save.setFixedHeight(50)
         btn_save.clicked.connect(self.save_settings)
         
-        btn_res极客
         btn_reset = self.create_button("Reset to Default", "#F44336")
         btn_reset.setFixedHeight(50)
         btn_reset.clicked.connect(self.reset_settings)
@@ -180,7 +178,7 @@ class AimAssistApp(QMainWindow):
         btn_layout.addWidget(btn_reset)
         layout.addLayout(btn_layout)
         
-        # Spacer
+        # مساحة فارغة
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
         
         tab.setLayout(layout)
@@ -198,12 +196,12 @@ class AimAssistApp(QMainWindow):
         title.setStyleSheet("color: #1E90FF; margin-bottom: 20px;")
         layout.addWidget(title)
         
-        # Contact cards
+        # بطاقات الاتصال
         contact_frame = QFrame()
         contact_frame.setStyleSheet("background-color: #252525; border-radius: 10px; padding: 20px;")
         contact_layout = QVBoxLayout()
         
-        # Email support
+        # دعم البريد الإلكتروني
         email_card = self.create_contact_card(
             "Email Support", 
             "support@codassist.com", 
@@ -213,7 +211,7 @@ class AimAssistApp(QMainWindow):
         email_card.clicked.connect(lambda: self.open_email("support@codassist.com"))
         contact_layout.addWidget(email_card)
         
-        # Discord community
+        # مجتمع الديسكورد
         discord_card = self.create_contact_card(
             "Discord Community", 
             "discord.gg/codassist", 
@@ -223,7 +221,7 @@ class AimAssistApp(QMainWindow):
         discord_card.clicked.connect(lambda: webbrowser.open("https://discord.gg/codassist"))
         contact_layout.addWidget(discord_card)
         
-        # Website
+        # الموقع الرسمي
         website_card = self.create_contact_card(
             "Official Website", 
             "www.codassist.com", 
@@ -233,7 +231,7 @@ class AimAssistApp(QMainWindow):
         website_card.clicked.connect(lambda: webbrowser.open("https://www.codassist.com"))
         contact_layout.addWidget(website_card)
         
-        # Updates
+        # التحديثات
         updates_card = self.create_contact_card(
             "Check for Updates", 
             "Version 1.5 (Latest)", 
@@ -246,7 +244,7 @@ class AimAssistApp(QMainWindow):
         contact_frame.setLayout(contact_layout)
         layout.addWidget(contact_frame)
         
-        # Copyright
+        # حقوق النشر
         copyright = QLabel("© 2023 COD AimAssist. All rights reserved.")
         copyright.setFont(QFont("Arial", 9))
         copyright.setAlignment(Qt.AlignCenter)
@@ -291,7 +289,7 @@ class AimAssistApp(QMainWindow):
         layout.setHorizontalSpacing(20)
         layout.setVerticalSpacing(15)
         
-        # Aim assist types
+        # أنواع المساعدة على التصويب
         assist_types = [
             ("Lite AimAssist", "#4CAF50", "Low intensity assist for subtle aiming help"),
             ("Normal AimAssist", "#2196F3", "Standard assist for balanced gameplay"),
@@ -299,19 +297,19 @@ class AimAssistApp(QMainWindow):
             ("Super AimAssist", "#F44336", "Maximum assist for competitive advantage")
         ]
         
-        # Create buttons for each type
+        # إنشاء أزرار لكل نوع
         for i, (name, color, tip) in enumerate(assist_types):
-            # Start button
+            # زر البدء
             btn = self.create_button(name, color, tip)
             btn.setFixedHeight(60)
             layout.addWidget(btn, i, 0)
             
-            # Stop button
+            # زر الإيقاف
             stop_btn = self.create_button(f"Stop {name}", "#555555", "Deactivate this aim assist level")
             stop_btn.setFixedHeight(60)
             layout.addWidget(stop_btn, i, 1)
             
-            # Connect events
+            # ربط الأحداث
             btn.clicked.connect(lambda checked, n=name: self.activate_aim_assist(n))
             stop_btn.clicked.connect(lambda checked, n=name: self.deactivate_aim_assist(n))
         
@@ -323,7 +321,7 @@ class AimAssistApp(QMainWindow):
         layout = QHBoxLayout()
         layout.setSpacing(15)
         
-        # Additional buttons
+        # أزرار إضافية
         buttons = [
             ("Head", "#9C27B0", "Focus aim on head shots"),
             ("Random", "#00BCD4", "Randomize aim pattern for unpredictability"),
@@ -415,7 +413,7 @@ class AimAssistApp(QMainWindow):
             }
             QSlider::add-page:horizontal {
                 background: #555;
-                border-radius: 4极客
+                border-radius: 4px;
             }
             QSlider::sub-page:horizontal {
                 background: #1E90FF;
@@ -455,17 +453,17 @@ class AimAssistApp(QMainWindow):
             return
             
         try:
-            # Capture screenshot
+            # التقاط لقطة الشاشة
             screenshot = pyautogui.screenshot()
             frame = np.array(screenshot)
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             
-            # Create mask for target color
+            # إنشاء قناع للون الهدف
             diff = np.abs(frame - self.target_color)
             mask = np.sum(diff, axis=2) < self.threshold
             mask = mask.astype(np.uint8) * 255
             
-            # Find contours
+            # العثور على الكنتورات
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             if contours:
                 largest = max(contours, key=cv2.contourArea)
@@ -474,22 +472,22 @@ class AimAssistApp(QMainWindow):
                     cx = int(M['m10'] / M['m00'])
                     cy = int(M['m01'] / M['m00'])
                     
-                    # Get screen center
+                    # الحصول على مركز الشاشة
                     screen_width, screen_height = pyautogui.size()
                     center_x = screen_width // 2
                     center_y = screen_height // 2
                     
-                    # Calculate movement
+                    # حساب الحركة
                     move_x = int((cx - center_x) * self.sensitivity)
                     move_y = int((cy - center_y) * self.sensitivity)
                     
-                    # Move mouse
+                    # تحريك الفأرة
                     pyautogui.moveRel(move_x, move_y, duration=0.01)
                     self.status_label.setText(f"Tracking | Target at ({cx}, {cy})")
         except Exception as e:
             self.status_label.setText(f"Error: {str(e)}")
         
-        # Check for F8 to stop
+        # التحقق من الضغط على F8 للإيقاف
         if keyboard.is_pressed('f8'):
             self.active = False
             self.tracker_timer.stop()
@@ -497,18 +495,18 @@ class AimAssistApp(QMainWindow):
     
     def select_target_color(self):
         self.hide()
-        time.sleep(0.5)  # Give time to hide window
+        time.sleep(0.5)  # إعطاء وقت لإخفاء النافذة
         
-        # Capture screenshot
+        # التقاط لقطة الشاشة
         screenshot = pyautogui.screenshot()
         frame = np.array(screenshot)
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         
-        # Create window for color selection
+        # إنشاء نافذة لاختيار اللون
         cv2.namedWindow("Select Target Color - Click then press ESC", cv2.WINDOW_NORMAL)
         cv2.resizeWindow("Select Target Color - Click then press ESC", 800, 600)
         
-        # Mouse callback function
+        # دالة رد الماوس
         def mouse_callback(event, x, y, flags, param):
             if event == cv2.EVENT_LBUTTONDOWN:
                 self.target_color = frame[y, x].copy()
@@ -547,7 +545,7 @@ class AimAssistApp(QMainWindow):
         self.status_label.setText("Settings reset to default")
 
 if __name__ == "__main__":
-    # Hide console window on Windows
+    # إخفاء نافذة الكونسول في ويندوز
     if sys.platform == "win32":
         import ctypes
         ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 0)
@@ -555,7 +553,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     
-    # Customize color palette
+    # تخصيص لوحة الألوان
     palette = app.palette()
     palette.setColor(QPalette.Window, QColor(30, 30, 30))
     palette.setColor(QPalette.WindowText, QColor(220, 220, 220))
